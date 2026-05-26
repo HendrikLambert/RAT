@@ -83,6 +83,71 @@ After we obtain the pretrained models, we can conduct different downstream evalu
 * Table 12. We evaluate using [RULER benchmark](https://github.com/NVIDIA/RULER) repo. We provide necessary files in eval/ruler.
 
 
+## Local smoke run (MacBook M1, CPU)
+
+The original repo is CUDA-only. This fork adds a minimal CPU/MPS fallback so the
+full pipeline (tokenize → train → validate) can be exercised on a laptop before
+submitting the real job to a cluster. Numbers from the smoke run are **not**
+meaningful for the paper reproduction — they only prove the pipeline works.
+
+```bash
+# 1. Environment (Python 3.10+ recommended)
+python3 -m venv .venv && source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# 2. Tokenize a tiny PG19 slice (~50 books, streams in only what is needed)
+python tokenize/pg19.py --out_dir ./data/pg19 --max_examples 50 --max_val_examples 5 --num_proc 4
+
+# 3. Smoke train each baseline (each run takes a few minutes on M1)
+bash scripts/run_local.sh attention_smoke
+bash scripts/run_local.sh rat_smoke
+bash scripts/run_local.sh rnn_smoke
+
+# 4. Smoke train Hierarchical RAT (per-layer chunk size)
+bash scripts/run_local.sh rat_hier_smoke
+```
+
+Each run prints `validation loss is X.XXXX and metric is X.XX` at the end.
+Set `RAT_DEVICE=mps` before the command to try the Apple Silicon GPU backend
+instead of CPU (slower start-up, faster steady state).
+
+Verified on M1 Pro / Python 3.12 / torch 2.8 / 5 train books / seq_len=256:
+
+| Variant | Wall time | Final val loss | Val PPL |
+|---|---|---|---|
+| `attention_smoke` | 30 s | 7.6540 | 2108.98 |
+| `rat_smoke` (L=64)| 47 s | 7.6517 | 2104.24 |
+| `rnn_smoke` | 37 s | 7.5908 | 1979.84 |
+| `rat_hier_smoke` (L=[64, 128]) | 58 s | 7.6634 | 2128.94 |
+
+These numbers are **not** a paper reproduction — the model is 12 M params
+(50 257-vocab embedding dominates), trained on 200 K tokens at d_model=128.
+They prove the pipeline executes end-to-end, nothing more. Real PPL trends
+need the 200 M config on a GPU.
+
+## Running on DelftBlue / DAIC
+
+SLURM templates live in [scripts/delftblue.sbatch](scripts/delftblue.sbatch) and
+[scripts/daic.sbatch](scripts/daic.sbatch). Lines you need to edit are marked
+`EDIT:` — account, partition, GPU type, module loads, venv/conda activation, and
+data directory. Once filled in:
+
+```bash
+# Tokenize the full PG19 corpus to your scratch space (drop --max_examples)
+python tokenize/pg19.py --out_dir $SCRATCH/pg19 --num_proc 32
+
+# Submit the 200M ablation (defaults to experiment=pg19/rat)
+sbatch scripts/delftblue.sbatch
+EXPERIMENT=pg19/attention sbatch scripts/delftblue.sbatch
+EXPERIMENT=pg19/rnn       sbatch scripts/delftblue.sbatch
+```
+
+For the Hierarchical-RAT improvement experiment (Sec. 3 of the proposal),
+create `configs/experiment/pg19/rat_hier.yaml` (mirror of `rat.yaml` with
+`model.backbone.chunk_sizes: [64, 64, 64, 64, 256, 256, 256, 256, 256, 256, 256, 256]`
+and `pe: multi_interrope`) and submit with `EXPERIMENT=pg19/rat_hier`.
+
 ## Efficiency results
 We test latency on the GH200 GPU.
 * single layer (including the input and output projections)

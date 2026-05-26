@@ -10,7 +10,7 @@ class AttentionCache: # k after rope
                  d_head,
                  num_layer=1,
                  dtype=torch.bfloat16,
-                 device="cuda"):
+                 device=None):
         self.max_bs = max_bs
         self.max_seq_len = max_seq_len
         self.num_layer = num_layer
@@ -43,7 +43,7 @@ class LocalAttentionCache: # k after rope
                  d_head,
                  num_layer=1,
                  dtype=torch.bfloat16,
-                 device="cuda"):
+                 device=None):
         self.max_bs = max_bs
         self.window_size = window_size
         self.num_layer = num_layer
@@ -76,7 +76,7 @@ class RNNCache:
                  d_model,
                  num_layer=1,
                  dtype=torch.bfloat16,
-                 device="cuda"):
+                 device=None):
         self.max_bs = max_bs
         self.d_model = d_model
         self.bs_start = 0
@@ -104,7 +104,7 @@ class RATCache:
                  d_model,
                  num_layer=1,
                  dtype=torch.bfloat16,
-                 device="cuda"):
+                 device=None):
         self.max_bs = max_bs
         self.max_num_chunk = max_num_chunk
         self.chunk_size = chunk_size

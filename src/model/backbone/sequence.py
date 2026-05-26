@@ -43,15 +43,22 @@ class SequenceBackbone(Base):
         bias: bool = False,
         dropout = 0.0,
         init: dict = None,
+        chunk_sizes=None,  # optional per-layer chunk sizes for Hierarchical RAT
         **kwargs,
     ):
         super().__init__()
         self.num_layers = num_layers
         self.d_model = d_model
         self.init = init
-        self.layers = nn.ModuleList(
-            [SequenceBlock(seq_cell, hidden_cell, layer_id=i, **kwargs) for i in range(num_layers)]
-        )
+        self.chunk_sizes = chunk_sizes
+        layers = []
+        for i in range(num_layers):
+            cell = copy.deepcopy(seq_cell)
+            if chunk_sizes is not None and "chunk_size" in cell:
+                assert len(chunk_sizes) == num_layers, "chunk_sizes must have length num_layers"
+                cell["chunk_size"] = chunk_sizes[i]
+            layers.append(SequenceBlock(cell, hidden_cell, layer_id=i, **kwargs))
+        self.layers = nn.ModuleList(layers)
         self.ln = norm_registry[ln](d_model, eps=1.0e-6)
         self.init_weights(init)
 

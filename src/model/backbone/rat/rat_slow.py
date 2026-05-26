@@ -6,7 +6,7 @@ from torch.nn.attention import flex_attention as fla
 from ....utils.registry import layer_registry, norm_registry
 from ...base import Base
 from ..util import apply_rotary_pos_emb
-from ...op import pscan, merge_last_token_naive, ascan
+from ...op import pscan, merge_last_token_naive, ascan, block_causal_attention_with_lse
 from ..cache import RATCache
 # v, out_proj, ogate, fgate (k, q shared)  Full for RNN ngroups=2 1024 * 64 * 4
 
@@ -25,7 +25,7 @@ class RATSlow(Base):
         **kwargs,
     ):
         super().__init__()
-        factory_kwargs = {"device": kwargs.get("device", "cuda"),
+        factory_kwargs = {"device": kwargs.get("device", None),
                           "dtype": kwargs.get("dtype", torch.float32)}
         self.layer_id = kwargs.get("layer_id", 0)
         self.chunk_size = chunk_size
@@ -94,8 +94,11 @@ class RATSlow(Base):
             cache.cache[self.layer_id][1][cache.bs_start: cache.bs_start + bs, :, cache.chunk_start: cache.chunk_start + num_chunk].copy_(chunk_intra_x)
             # TODO: consider the case when seq_len is not multiple of chunks, then also saves the last token value here
 
-        block_mask = fla.create_block_mask(self.block_causal_mask, 1, 1, q.shape[2], num_chunk, device="cuda")
-        inter_out, inter_lse = fla.flex_attention(q, chunk_intra_k, chunk_intra_x, scale=self.softmax_scale, block_mask=block_mask, return_lse=True)
+        if q.device.type == "cuda":
+            block_mask = fla.create_block_mask(self.block_causal_mask, 1, 1, q.shape[2], num_chunk, device="cuda")
+            inter_out, inter_lse = fla.flex_attention(q, chunk_intra_k, chunk_intra_x, scale=self.softmax_scale, block_mask=block_mask, return_lse=True)
+        else:
+            inter_out, inter_lse = block_causal_attention_with_lse(q, chunk_intra_k, chunk_intra_x, self.chunk_size, self.softmax_scale)
         intra_lse = (torch.einsum("balp,balp->bal", q, intra_k) * self.softmax_scale).to(torch.float32)
         out = merge_last_token_naive(inter_out, intra_x, inter_lse, intra_lse).transpose(1, 2).reshape(bs, seq_len, self.d_model)
         final_out = self.prepare_output(out, z) + shortcut

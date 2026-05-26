@@ -1,0 +1,16 @@
+# Smoke / local-dev dependencies for the RAT pipeline on macOS (CPU / MPS).
+# Cluster (DelftBlue / DAIC) builds use the Dockerfile or a matching CUDA-enabled
+# torch wheel; pin those separately on the cluster.
+torch>=2.5,<2.9
+transformers>=4.40
+datasets>=2.18,<4.0   # PG19 on HF is script-based; datasets>=4 removed support
+hydra-core>=1.3
+omegaconf>=2.3
+einops>=0.7
+easydict>=1.10
+torchmetrics>=1.3
+tqdm>=4.66
+wandb>=0.16
+numpy>=1.26
+scikit-learn>=1.3
+sentencepiece>=0.1.99

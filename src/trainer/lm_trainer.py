@@ -31,7 +31,8 @@ class LMTrainer(trainer.Trainer):
         assert self.config.task._name_ == "lm"
 
     def forward(self, input_ids, labels):
-        with torch.amp.autocast("cuda", enabled=True, dtype=self.train_dtype):
+        autocast_enabled = self.device.type == "cuda"
+        with torch.amp.autocast(self.device.type, enabled=autocast_enabled, dtype=self.train_dtype):
             preds = self.task_wrapper(input_ids=input_ids, seq_start=0, cache=None).to(torch.float32)
         loss = self.task.get_loss(preds, labels)
         return loss, preds
@@ -43,8 +44,8 @@ class LMTrainer(trainer.Trainer):
         ddp_samples = torch.tensor(0.0).to(self.device)
         self.task.metric.reset()
         for i, (inputs, labels, *extra_args) in enumerate(self.val_loader):
-            inputs = inputs.to("cuda", non_blocking=True)
-            labels = labels.to("cuda", non_blocking=True)
+            inputs = inputs.to(self.device, non_blocking=True)
+            labels = labels.to(self.device, non_blocking=True)
             loss, preds = self.forward(inputs, labels)
             cnt = (labels != self.config.task.ignore_index).sum().item()
             ddp_loss += loss * cnt

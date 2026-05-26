@@ -78,7 +78,7 @@ class RoPEInterRoPE(nn.Module):
 @pe_registry.register("rope")
 class RoPE(nn.Module):
 
-    def __init__(self, dim, max_seq_len=2048, base=10000, device="cuda", **kwargs):
+    def __init__(self, dim, max_seq_len=2048, base=10000, device=None, **kwargs):
         super().__init__()
         self.dim = dim
         self.max_seq_len = max_seq_len
@@ -104,3 +104,31 @@ class RoPE(nn.Module):
 
     def step(self, seq_start, seq_end, device, dtype):
         return self.forward(seq_start, seq_end, device, dtype)
+
+
+@pe_registry.register("multi_interrope")
+class MultiInterRoPE(nn.Module):
+    """Holds one InterRoPE per unique chunk_size so a model with heterogeneous
+    per-layer chunk sizes (Hierarchical RAT) can fetch the right rotary cache
+    via interrope_<chunk_size> keys in kwargs."""
+
+    def __init__(self, dim, max_num_chunk, chunk_sizes, base=10000, device=None, **kwargs):
+        super().__init__()
+        unique = sorted(set(chunk_sizes))
+        self.ropes = nn.ModuleList([
+            InterRoPE(dim, max_num_chunk, cs, base, device=device, **kwargs) for cs in unique
+        ])
+
+    def forward(self, seq_start, seq_end, device, dtype):
+        merged = {}
+        for m in self.ropes:
+            _, d = m(seq_start, seq_end, device, dtype)
+            merged.update(d)
+        return None, merged
+
+    def step(self, seq_start, seq_end, device, dtype):
+        merged = {}
+        for m in self.ropes:
+            _, d = m.step(seq_start, seq_end, device, dtype)
+            merged.update(d)
+        return None, merged

@@ -57,7 +57,20 @@ if __name__ == "__main__":
     gpu_id = int(os.getenv("RANK", -1))
     world_size = int(os.getenv("WORLD_SIZE", 1))
     local_rank = int(os.getenv("LOCAL_RANK", -1))
-    torch.cuda.set_device(local_rank)
-    dist.init_process_group(backend="nccl", world_size=world_size, rank=gpu_id, init_method="env://")
+    # RAT_DEVICE picks the runtime device for portable launch (M1 / cluster).
+    # Defaults to cuda when available, else cpu. Set to "mps" or "cpu" to override.
+    env_device = os.getenv("RAT_DEVICE")
+    if env_device is not None:
+        device_type = env_device
+    elif torch.cuda.is_available():
+        device_type = "cuda"
+    else:
+        device_type = "cpu"
+    if device_type == "cuda":
+        torch.cuda.set_device(local_rank)
+        backend = "nccl"
+    else:
+        backend = "gloo"
+    dist.init_process_group(backend=backend, world_size=world_size, rank=gpu_id, init_method="env://")
     main()
     dist.destroy_process_group()

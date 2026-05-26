@@ -1,0 +1,27 @@
+_name_: pg19_gpt2_smoke
+seq_len: 256
+ignore_input_index: 50256
+num_bytes: 2
+vocab_size: 50257
+batch_size: 1
+global_batch_size: 1
+train:
+  _name_: lm_ordered
+  tokenized_file_path: ./data/pg19/gpt2-train.bin
+  batch_size: ${..batch_size}
+  global_batch_size: ${..global_batch_size}
+  seq_len: ${..seq_len}
+  num_bytes: ${..num_bytes}
+  vocab_size: ${..vocab_size}
+  limit_tokens: 200000
+  ignore_input_index: ${..ignore_input_index}
+val:
+  _name_: lm_ordered
+  tokenized_file_path: ./data/pg19/gpt2-val.bin
+  batch_size: ${..batch_size}
+  global_batch_size: ${..global_batch_size}
+  seq_len: ${..seq_len}
+  num_bytes: ${..num_bytes}
+  vocab_size: ${..vocab_size}
+  ignore_input_index: ${..ignore_input_index}
+  limit_tokens: 20000

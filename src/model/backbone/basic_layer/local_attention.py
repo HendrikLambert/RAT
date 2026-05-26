@@ -24,7 +24,7 @@ class LocalAttention(Base):
     ):
         super().__init__()
         factory_kwargs = {
-            "device": kwargs.get("device", "cuda"),
+            "device": kwargs.get("device", None),
             "dtype": kwargs.get("dtype", torch.float32),
         }
         self.d_model = d_model
@@ -74,8 +74,15 @@ class LocalAttention(Base):
             k_window, x_window = k[:, :, max(0, window_shift): seq_end], x[:, :, max(0, window_shift): seq_end]
             cache.cache[self.layer_id][0][cache.bs_start: cache.bs_start + bs, :, cache.seq_start: cache.seq_start + k_window.shape[2]].copy_(k_window)
             cache.cache[self.layer_id][1][cache.bs_start: cache.bs_start + bs, :, cache.seq_start: cache.seq_start + x_window.shape[2]].copy_(x_window)
-        block_mask = fla.create_block_mask(self.block_causal_mask, 1, 1, q.shape[2], k.shape[2], device="cuda")
-        attn_out = fla.flex_attention(q, k, x, block_mask=block_mask).transpose(1, 2).reshape(bs, seq_len, self.d_model)
+        if q.device.type == "cuda":
+            block_mask = fla.create_block_mask(self.block_causal_mask, 1, 1, q.shape[2], k.shape[2], device="cuda")
+            attn_out = fla.flex_attention(q, k, x, block_mask=block_mask).transpose(1, 2).reshape(bs, seq_len, self.d_model)
+        else:
+            L_q, L_kv = q.shape[2], k.shape[2]
+            q_idx = torch.arange(L_q, device=q.device).view(L_q, 1)
+            kv_idx = torch.arange(L_kv, device=q.device).view(1, L_kv)
+            mask = (q_idx >= kv_idx) & ((q_idx - kv_idx) <= self.window_size)
+            attn_out = F.scaled_dot_product_attention(q, k, x, attn_mask=mask).transpose(1, 2).reshape(bs, seq_len, self.d_model)
         final_out = self.out_proj(attn_out) + shortcut
         return final_out
 
