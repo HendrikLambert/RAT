@@ -126,27 +126,68 @@ These numbers are **not** a paper reproduction — the model is 12 M params
 They prove the pipeline executes end-to-end, nothing more. Real PPL trends
 need the 200 M config on a GPU.
 
-## Running on DelftBlue / DAIC
+## Running on DelftBlue
 
-SLURM templates live in [scripts/delftblue.sbatch](scripts/delftblue.sbatch) and
-[scripts/daic.sbatch](scripts/daic.sbatch). Lines you need to edit are marked
-`EDIT:` — account, partition, GPU type, module loads, venv/conda activation, and
-data directory. Once filled in:
+Three specialized SLURM batch submission scripts are provided under `scripts/` for executing cluster experiments. They are pre-configured to use the education account (`education-eemcs-msc-cs`) and appropriate GPU allocations.
 
+### 0. Prepare Dataset (Login Node)
+Because DelftBlue compute nodes do not have internet access, you must download and tokenize the PG19 dataset on a **login node** (which has public internet access) before submitting training jobs.
+
+To tokenize the full dataset to your `/scratch/mdchu/pg19` directory, run:
 ```bash
-# Tokenize the full PG19 corpus to your scratch space (drop --max_examples)
-python tokenize/pg19.py --out_dir $SCRATCH/pg19 --num_proc 32
+python tokenize/pg19.py --out_dir /scratch/mdchu/pg19 --num_proc 8
+```
+*(Optionally, for a quick cluster check, download a tiny slice of 50 books first using `python tokenize/pg19.py --out_dir ./data/pg19 --max_examples 50 --max_val_examples 5 --num_proc 4` on the login node).*
 
-# Submit the 200M ablation (defaults to experiment=pg19/rat)
-sbatch scripts/delftblue.sbatch
-EXPERIMENT=pg19/attention sbatch scripts/delftblue.sbatch
-EXPERIMENT=pg19/rnn       sbatch scripts/delftblue.sbatch
+### 1. Cluster Smoke Test (Low Queue Time)
+We use the dedicated `gpu-a100-small` partition for fast, lightweight pipeline verification (max 4h, 1 GPU, 2 CPUs). This allows you to verify that CUDA execution, conda/venv environments, and data loading work perfectly before running full experiments.
+
+Submit any smoke variant by setting the `EXPERIMENT` environment variable:
+```bash
+# Verify standard Attention smoke test on cluster
+EXPERIMENT=attention_smoke sbatch scripts/delftblue_smoke.sbatch
+
+# Verify standard RAT smoke test on cluster
+EXPERIMENT=rat_smoke sbatch scripts/delftblue_smoke.sbatch
+
+# Verify standard RNN smoke test on cluster
+EXPERIMENT=rnn_smoke sbatch scripts/delftblue_smoke.sbatch
+
+# Verify Hierarchical RAT smoke test on cluster
+EXPERIMENT=rat_hier_smoke sbatch scripts/delftblue_smoke.sbatch
 ```
 
-For the Hierarchical-RAT improvement experiment (Sec. 3 of the proposal),
-create `configs/experiment/pg19/rat_hier.yaml` (mirror of `rat.yaml` with
-`model.backbone.chunk_sizes: [64, 64, 64, 64, 256, 256, 256, 256, 256, 256, 256, 256]`
-and `pe: multi_interrope`) and submit with `EXPERIMENT=pg19/rat_hier`.
+### 2. Part 1: Reproducibility Ablation (200M Model, 3B Tokens)
+Full reproducibility jobs request **2 GPUs** on the `gpu-a100` partition with a 24-hour wall time limit. Submit the different variants (MVP baselines and stretch goals) as follows:
+
+```bash
+# --- MVP Baselines (Sequence Length T = 8192) ---
+# Attention (L=1)
+EXPERIMENT=pg19/attention sbatch scripts/delftblue_part1.sbatch
+
+# RNN (L=T)
+EXPERIMENT=pg19/rnn sbatch scripts/delftblue_part1.sbatch
+
+# RAT (L=128)
+EXPERIMENT=pg19/rat_l128 sbatch scripts/delftblue_part1.sbatch
+
+# --- Stretch Goals ---
+# RAT (L=64)
+EXPERIMENT=pg19/rat_l64 sbatch scripts/delftblue_part1.sbatch
+
+# RAT (L=256)
+EXPERIMENT=pg19/rat_l256 sbatch scripts/delftblue_part1.sbatch
+
+# RAT L=16 (Tested at shorter context T=4096, global batch size 256 for ~1M tokens)
+EXPERIMENT=pg19/rat_l16 sbatch scripts/delftblue_part1.sbatch
+```
+
+### 3. Part 2: Improvement (Hierarchical RAT)
+To train the Split Hierarchical RAT configuration (layers 0-3 at $L=64$, layers 4-11 at $L=256$, matching the baseline's FLOP budget), submit the Part 2 job:
+
+```bash
+sbatch scripts/delftblue_part2.sbatch
+```
 
 ## Efficiency results
 We test latency on the GH200 GPU.

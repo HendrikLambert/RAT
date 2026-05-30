@@ -30,9 +30,9 @@
 set -euo pipefail
 
 # EDIT: load the modules your DelftBlue setup needs (CUDA, Python, etc).
-module load 2023r1
+module load 2025
 module load cuda/12.1
-module load python/3.11
+module load python/3.11.9
 
 # EDIT: path to your venv / conda env with torch>=2.5, transformers, datasets, hydra-core, ...
 source "$HOME/envs/rat/bin/activate"
