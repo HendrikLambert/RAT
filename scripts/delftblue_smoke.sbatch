@@ -11,7 +11,7 @@
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-task=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem-per-cpu=8G
+#SBATCH --mem-per-cpu=8000M
 #SBATCH --time=00:30:00
 #SBATCH --job-name=rat-smoke
 #SBATCH --output=slurm-smoke-%j.out
