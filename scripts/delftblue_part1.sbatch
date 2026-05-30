@@ -28,8 +28,8 @@ module load 2025
 module load cuda/12.1
 module load python/3.11.9
 
-# Activate virtual environment. Update this path if your environment is installed elsewhere.
-source "$HOME/envs/rat/bin/activate"
+# Add virtual environment packages to PYTHONPATH (bypasses architecture-specific shebang issues)
+export PYTHONPATH="$HOME/envs/rat/lib/python3.11/site-packages:${PYTHONPATH:-}"
 
 cd "$SLURM_SUBMIT_DIR"
 
@@ -46,7 +46,7 @@ NNODES=1
 
 echo "==> nodes=$NNODES gpus/node=$NPROC_PER_NODE experiment=$EXPERIMENT data_dir=$DATA_DIR"
 
-srun torchrun \
+srun python3 -m torch.distributed.run \
   --nnodes="$NNODES" \
   --nproc_per_node="$NPROC_PER_NODE" \
   --rdzv-backend=c10d \
