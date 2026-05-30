@@ -51,4 +51,5 @@ srun python3 -m torch.distributed.run \
   data.val.tokenized_file_path="$DATA_DIR/gpt2-val.bin" \
   trainer.device=cuda \
   trainer.dtype=bfloat16 \
-  trainer.max_epoch=1
+  trainer.max_epoch=1 \
+  base_dir="$SLURM_SUBMIT_DIR"
