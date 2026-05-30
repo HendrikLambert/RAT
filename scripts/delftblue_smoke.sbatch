@@ -8,11 +8,10 @@
 
 #SBATCH --account=education-eemcs-msc-cs
 #SBATCH --partition=gpu-a100-small
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --gres=gpu:1
+#SBATCH --ntasks=1
+#SBATCH --gpus-per-task=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=32G
+#SBATCH --mem-per-cpu=16G
 #SBATCH --time=00:30:00
 #SBATCH --job-name=rat-smoke
 #SBATCH --output=slurm-smoke-%j.out
