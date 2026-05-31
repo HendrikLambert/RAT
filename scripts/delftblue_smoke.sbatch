@@ -13,8 +13,8 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=8000M
 #SBATCH --time=00:30:00
-#SBATCH --job-name=rat-smoke
-#SBATCH --output=slurm-smoke-%j.out
+#SBATCH --job-name=smoke
+#SBATCH --output=slurm-%x-%j.out
 
 set -euo pipefail
 
@@ -52,4 +52,6 @@ srun python3 -m torch.distributed.run \
   trainer.device=cuda \
   trainer.dtype=bfloat16 \
   trainer.max_epoch=1 \
-  base_dir="$SLURM_SUBMIT_DIR"
+  trainer.save_dir="/scratch/$USER/ckpt" \
+  base_dir="$SLURM_SUBMIT_DIR" \
+  wandb_use=false
