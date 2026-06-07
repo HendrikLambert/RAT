@@ -1,4 +1,6 @@
 #!/bin/bash
+#SBATCH --account=education-eemcs-msc-cs
+#SBATCH --partition=gpu-a100
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gpus-per-task=1
