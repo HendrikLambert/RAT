@@ -51,5 +51,6 @@ srun python3 -m torch.distributed.run \
   trainer.dtype=bfloat16 \
   trainer.max_epoch=1 \
   trainer.save_dir="/scratch/$USER/ckpt" \
+  trainer.torch_compile=false \
   base_dir="$SLURM_SUBMIT_DIR" \
   wandb_use=false
