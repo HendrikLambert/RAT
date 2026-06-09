@@ -12,6 +12,8 @@
 
 set -euo pipefail
 
+module load 2025
+module load cuda/12.1
 module load python/3.11.9
 export PYTHONPATH="$HOME/envs/rat/lib/python3.11/site-packages:${PYTHONPATH:-}"
 
