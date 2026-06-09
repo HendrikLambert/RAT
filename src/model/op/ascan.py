@@ -11,7 +11,7 @@ class AScan(torch.autograd.Function): # (b c l p)
         g_j, x_j = j
         return g_j * g_i, g_j * x_i + x_j
 
-    @torch.compile
+    # @torch.compile
     @staticmethod
     @torch.amp.custom_fwd(cast_inputs=torch.float32, device_type="cuda")
     def forward(ctx, g, x):
@@ -20,7 +20,7 @@ class AScan(torch.autograd.Function): # (b c l p)
         ctx.save_for_backward(g, x_scan)
         return x_scan
 
-    @torch.compile
+    # @torch.compile
     @staticmethod
     @torch.amp.custom_bwd(device_type="cuda") # (b c l p)
     def backward(ctx, grad):
