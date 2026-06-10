@@ -119,7 +119,7 @@ def parse_eff_logs(dir_path="."):
                     bs_match = re.search(r"bs:\s*(.+)", line)
                     if seq_match and bs_match:
                         seq = int(seq_match.group(1))
-                        bs_values = bs_match.group(2).split("/")
+                        bs_values = bs_match.group(1).split("/")
                         gen_scans.append({
                             "seq": seq,
                             "latencies": bs_values
