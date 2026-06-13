@@ -82,7 +82,7 @@ class RAT(Base):
         q = q.repeat(1, 1, self.num_head // self.ngroups).reshape(bs, seq_len, self.num_head, self.d_head).transpose(1, 2)
         x, g, k = map(lambda m: m.reshape(bs, num_chunk, self.chunk_size, self.d_model), (x, g, k))
         g = g.repeat(1, 1, 1, 2) # (b c l d)
-        intra_xk = ascan(g, ((1.0 - g) * torch.cat([x, k], dim=-1))).to(torch.bfloat16)
+        intra_xk = pscan(g.transpose(1, 2), ((1.0 - g) * torch.cat([x, k], dim=-1)).transpose(1, 2)).transpose(1, 2).to(torch.bfloat16)
         intra_x, intra_k = intra_xk[..., :self.d_model].reshape(bs, seq_len, self.d_model), intra_xk[..., self.d_model:].reshape(bs, seq_len, self.d_model)
         if cache is not None:
             shift = kwargs.get("seq_end", seq_len)
