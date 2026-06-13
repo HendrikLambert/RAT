@@ -9,12 +9,19 @@ def parse_slurm_files(dir_path="."):
     # Matches filenames like: slurm-attn-10028953.out, slurm-l16-10087274.out
     pattern = re.compile(r"slurm-(.+)-(\d+)\.out")
     
+    # Collect and sort files by job_id ascending so that newer jobs override older ones
+    slurm_files = []
     for filename in os.listdir(dir_path):
         match = pattern.match(filename)
         if not match:
             continue
         job_name, job_id = match.groups()
+        slurm_files.append((filename, job_name, int(job_id)))
         
+    slurm_files.sort(key=lambda x: x[2])
+    
+    for filename, job_name, job_id_int in slurm_files:
+        job_id = str(job_id_int)
         # Exclude temporary smoke test files and raw partition setup runs
         if "smoke" in job_name or "part" in job_name or "eff" in job_name:
             continue
