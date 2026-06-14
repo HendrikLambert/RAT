@@ -3,6 +3,8 @@ import sys
 import hydra
 import wandb
 import torch
+import torch._dynamo
+torch._dynamo.config.suppress_errors = True
 import torch.distributed as dist
 from omegaconf import OmegaConf
 from omegaconf.listconfig import ListConfig
