@@ -7,8 +7,8 @@ defaults:
 model:
   backbone:
     interleave_step: 4
-    cell1:
+    seq_cell1:
       _name_: layer/rat
       chunk_size: 64
-    cell2:
+    seq_cell2:
       _name_: layer/attention
