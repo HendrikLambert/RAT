@@ -38,6 +38,7 @@ class LMTrainer(trainer.Trainer):
         return loss, preds
 
     @torch.no_grad()
+    @torch.compiler.disable()
     def validate(self):
         self.task_wrapper.eval()
         ddp_loss = torch.tensor(0.0).to(self.device)
