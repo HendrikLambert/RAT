@@ -6,7 +6,7 @@
 #SBATCH --account=education-eemcs-msc-cs
 #SBATCH --partition=gpu-a100
 #SBATCH --ntasks=1
-#SBATCH --gpus-per-task=2
+#SBATCH --gpus-per-task=1
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=7500M
 #SBATCH --time=10:00:00
@@ -33,7 +33,7 @@ export TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 # Count available GPUs assigned to this task
-NPROC_PER_NODE=2
+NPROC_PER_NODE=1
 NNODES=1
 
 echo "==> nodes=$NNODES gpus/node=$NPROC_PER_NODE experiment=$EXPERIMENT data_dir=$DATA_DIR"
