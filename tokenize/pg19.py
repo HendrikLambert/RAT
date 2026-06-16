@@ -16,7 +16,7 @@ from tqdm import tqdm
 from transformers import GPT2TokenizerFast
 
 
-def tokenize_split(dataset, enc, eos_id, num_proc):
+def tokenize_split(dataset, enc, eos_id, num_proc, writer_batch_size=128):
     def fn(example):
         ids = enc(example["text"], truncation=False, padding=False, add_special_tokens=False)["input_ids"]
         ids.append(eos_id)
@@ -27,6 +27,10 @@ def tokenize_split(dataset, enc, eos_id, num_proc):
         remove_columns=dataset.column_names,
         desc="tokenizing",
         num_proc=num_proc,
+        # PG19 books are whole novels (some tokenize to >1M tokens). The default
+        # writer_batch_size=1000 buffers that many token-lists per worker before
+        # flushing, which OOM-kills the job. Cap it small to bound peak memory.
+        writer_batch_size=writer_batch_size,
     )
 
 
@@ -62,6 +66,8 @@ def parse_args():
     p.add_argument("--out_dir", required=True, help="output directory for .bin files")
     p.add_argument("--dataset", default="deepmind/pg19", help="HuggingFace dataset path or local dir")
     p.add_argument("--num_proc", type=int, default=16)
+    p.add_argument("--writer_batch_size", type=int, default=128,
+                   help="examples buffered per worker before flushing; keep small for PG19's huge books")
     p.add_argument("--max_examples", type=int, default=None,
                    help="if set, stream only the first N train examples (laptop smoke run)")
     p.add_argument("--max_val_examples", type=int, default=10,
@@ -89,7 +95,7 @@ def main():
         splits = {"train": ds["train"], "validation": ds["validation"]}
 
     for split, out_name in [("train", "gpt2-train.bin"), ("validation", "gpt2-val.bin")]:
-        tok = tokenize_split(splits[split], enc, eos_id, args.num_proc)
+        tok = tokenize_split(splits[split], enc, eos_id, args.num_proc, args.writer_batch_size)
         ntok = save_to_npmemmap(tok, os.path.join(args.out_dir, out_name))
         print(f"  {split}: {len(splits[split])} examples -> {ntok} tokens")
 
