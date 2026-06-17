@@ -48,7 +48,7 @@ fi
 # --- 2. Install dependencies ---
 echo "[2/4] Installing Python dependencies..."
 pip install -q torch>=2.5 torchvision --index-url https://download.pytorch.org/whl/cu121
-pip install -q transformers>=4.40 datasets>=2.18 hydra-core>=1.3 omegaconf>=2.3 \
+pip install -q "transformers>=4.40" "datasets>=2.18,<4.0" hydra-core>=1.3 omegaconf>=2.3 \
     einops>=0.7 easydict>=1.10 torchmetrics>=1.3 tqdm>=4.66 wandb>=0.16 \
     numpy>=1.26 scikit-learn>=1.3 sentencepiece>=0.1.99
 
@@ -70,8 +70,8 @@ DATA_DIR="/workspace/pg19"
 if [ ! -f "$DATA_DIR/gpt2-train.bin" ] || [ ! -f "$DATA_DIR/gpt2-val.bin" ]; then
     echo ""
     echo "ERROR: PG19 tokenized data not found at $DATA_DIR/"
-    echo "Please transfer from DelftBlue first:"
-    echo "  scp mdchu@login.delftblue.tudelft.nl:/scratch/mdchu/pg19/gpt2-*.bin /workspace/pg19/"
+    echo "Tokenize it on this box first (~30-60 min, has internet + CPU):"
+    echo "  python tokenize/pg19.py --out_dir $DATA_DIR --num_proc 8"
     exit 1
 fi
 echo "[4/4] Data found at $DATA_DIR"
