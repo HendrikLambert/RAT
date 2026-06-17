@@ -36,6 +36,10 @@ export RAT_DEVICE=cuda
 export TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export HF_HOME="$SHARED/hf"
+# torch.compile caches default to $HOME (only 8 GB on DAIC) — keep them on /tmp.
+export TORCHINDUCTOR_CACHE_DIR="/tmp/$USER/torchinductor"
+export TRITON_CACHE_DIR="/tmp/$USER/triton"
+export CUDA_CACHE_PATH="/tmp/$USER/nv"
 
 NPROC_PER_NODE=1
 NNODES=1

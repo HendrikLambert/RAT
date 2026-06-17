@@ -39,6 +39,11 @@ export RAT_DEVICE=cuda
 export TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export HF_HOME="$SHARED/hf"
+# torch.compile caches default to $HOME (only 8 GB on DAIC) — redirect to local
+# /tmp so they don't fill the home quota or hit home-FS permission quirks.
+export TORCHINDUCTOR_CACHE_DIR="/tmp/$USER/torchinductor"
+export TRITON_CACHE_DIR="/tmp/$USER/triton"
+export CUDA_CACHE_PATH="/tmp/$USER/nv"
 
 # Count GPUs assigned to this job from --gres=gpu:<type>:N
 NPROC_PER_NODE="$(echo "$SLURM_JOB_GPUS" | tr ',' '\n' | grep -c .)"

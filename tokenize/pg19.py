@@ -9,6 +9,7 @@ streaming dataset (avoids downloading the full ~11 GB PG19 corpus).
 """
 from argparse import ArgumentParser
 import os
+import tempfile
 
 import numpy as np
 from datasets import Dataset, load_dataset
@@ -31,6 +32,13 @@ def tokenize_split(dataset, enc, eos_id, num_proc, writer_batch_size=128):
         # writer_batch_size=1000 buffers that many token-lists per worker before
         # flushing, which OOM-kills the job. Cap it small to bound peak memory.
         writer_batch_size=writer_batch_size,
+        # Write the map cache to LOCAL disk: datasets os.chmod()'s its cache files,
+        # which fails on the /tudelft.net (CIFS) umbrella. A fresh per-call tmpdir
+        # ($MAP_CACHE_BASE or /tmp) avoids the chmod error and train/val collisions.
+        cache_file_name=os.path.join(
+            tempfile.mkdtemp(prefix="pg19map_", dir=os.environ.get("MAP_CACHE_BASE", "/tmp")),
+            "tok.arrow",
+        ),
     )
 
 
