@@ -70,5 +70,7 @@ srun apptainer exec --nv \
     trainer.max_epoch=1 \
     trainer.save_dir="$SHARED/ckpt" \
     trainer.torch_compile=true \
+    trainer.save_interval=0.05 \
     base_dir="$SLURM_SUBMIT_DIR" \
-    wandb_use=false
+    wandb_use=false \
+    "$@"
