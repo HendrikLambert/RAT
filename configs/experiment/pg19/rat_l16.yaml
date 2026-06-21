@@ -1,0 +1,13 @@
+# @package _global_
+defaults:
+  - pg19/rat
+  - _self_
+
+data:
+  seq_len: 4096
+  global_batch_size: 256 # 256 * 4096 = 1M tokens global batch size
+
+model:
+  backbone:
+    seq_cell:
+      chunk_size: 16

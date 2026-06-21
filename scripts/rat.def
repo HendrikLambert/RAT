@@ -1,0 +1,31 @@
+Bootstrap: docker
+From: pytorch/pytorch:2.5.1-cuda12.1-cudnn9-devel
+# DAIC Apptainer image for the RAT pipeline.
+# Base is a modern-glibc CUDA PyTorch image, so the host's glibc 2.17 is
+# irrelevant inside the container. `devel` (not `runtime`) so torch.compile's
+# inductor backend has gcc/headers available. torch is already in the base — we
+# only add the repo's extra deps (mirrors requirements.txt, minus torch).
+#
+# Build on a DAIC login node with scripts/daic_build_container.sh.
+# NGC alternative (needs an NGC API key): From: nvcr.io/nvidia/pytorch:25.03-py3
+
+%post
+    pip install --no-cache-dir \
+        "transformers>=4.40" \
+        "datasets>=2.18,<4.0" \
+        "hydra-core>=1.3" \
+        "omegaconf>=2.3" \
+        "einops>=0.7" \
+        "easydict>=1.10" \
+        "torchmetrics>=1.3" \
+        "tqdm>=4.66" \
+        "wandb>=0.16" \
+        "scikit-learn>=1.3" \
+        "sentencepiece>=0.1.99"
+
+%environment
+    export TOKENIZERS_PARALLELISM=false
+
+%labels
+    Project RAT
+    Purpose Hierarchical RAT training on DAIC

@@ -1,0 +1,6 @@
+_name_: multi_interrope
+dim: ${oc.select:model.backbone.seq_cell.k_channel,null}
+# InterRoPE grows its cache on demand, so an upper-bound initial size is fine.
+max_num_chunk: ${data.seq_len}
+chunk_sizes: ${model.backbone.chunk_sizes}
+base: 10000

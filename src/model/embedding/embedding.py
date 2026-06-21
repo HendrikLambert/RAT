@@ -23,7 +23,7 @@ class LMEmbedding(Base):
         self.d_model = d_model
         self.seq_len = seq_len
         self.pe = pe
-        self.wte = nn.Embedding(vocab_size, d_model, device=kwargs.get("device", "cuda"), dtype=kwargs.get("dtype", torch.float32))
+        self.wte = nn.Embedding(vocab_size, d_model, device=kwargs.get("device", None), dtype=kwargs.get("dtype", torch.float32))
         self.wpe = util_config.instantiate(pe_registry, pe, **kwargs)
         self.init_weights(init)
 

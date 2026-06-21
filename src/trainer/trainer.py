@@ -56,7 +56,11 @@ class Trainer:
         self.gpu_id = int(os.getenv("RANK", -1))  # gpu_id means global rank
         assert self.gpu_id != -1, "we only support torchrun in job submission"
         self.local_rank = int(os.getenv("LOCAL_RANK", -1))
-        self.device = (torch.device("cuda", self.local_rank) if self.local_rank != -1 else torch.device("cuda"))
+        device_type = os.getenv("RAT_DEVICE", getattr(self.config.trainer, "device", "cuda"))
+        if device_type == "cuda" and self.local_rank != -1:
+            self.device = torch.device("cuda", self.local_rank)
+        else:
+            self.device = torch.device(device_type)
         self.ngpus = dist.get_world_size() if self.gpu_id != -1 else 1
         print("The device is {} out of {}".format(self.gpu_id, self.ngpus))
         # set seed
@@ -74,9 +78,13 @@ class Trainer:
         # load checkpoint and consider ddp
         self.resume_kwargs = self.load_checkpoint()
         if self.gpu_id != -1:
-            self.task_wrapper = torch.nn.parallel.DistributedDataParallel(
-                self.task, device_ids=[self.local_rank], output_device=self.local_rank,
-                find_unused_parameters=False)  # we use self.task to show information, but task_wrapper for training and inference
+            if self.device.type == "cuda":
+                self.task_wrapper = torch.nn.parallel.DistributedDataParallel(
+                    self.task, device_ids=[self.local_rank], output_device=self.local_rank,
+                    find_unused_parameters=False)  # we use self.task to show information, but task_wrapper for training and inference
+            else:
+                self.task_wrapper = torch.nn.parallel.DistributedDataParallel(
+                    self.task, find_unused_parameters=False)
             if self.config.trainer.torch_compile:
                 self.task_wrapper = torch.compile(self.task_wrapper)
         self.set_logging()
@@ -86,10 +94,11 @@ class Trainer:
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
 
     def set_logging(self,):
         # set logging
@@ -234,7 +243,8 @@ class Trainer:
                     next(trainloader_iter)
 
         for i in train_iterator:
-            torch.cuda.synchronize()
+            if self.device.type == "cuda":
+                torch.cuda.synchronize()
             t0 = time.time()
             train_loss = 0.0
             for micro_step in range(self.gradient_accumulation_steps):
@@ -245,8 +255,8 @@ class Trainer:
                     inputs, labels, *extra_args = next(trainloader_iter)
                 ctx_fn = self.task_wrapper.no_sync if micro_step < self.gradient_accumulation_steps - 1 else nullcontext
                 with ctx_fn():
-                    inputs = inputs.to("cuda", non_blocking=True)
-                    labels = labels.to("cuda", non_blocking=True)
+                    inputs = inputs.to(self.device, non_blocking=True)
+                    labels = labels.to(self.device, non_blocking=True)
                     loss, _ = self.forward(inputs, labels)
                     loss = loss / self.gradient_accumulation_steps
                     train_loss = train_loss + loss.item()
@@ -258,12 +268,13 @@ class Trainer:
             self.optimizer.step()
             self.lr_scheduler.step()
             self.optimizer.zero_grad()
-            torch.cuda.synchronize()
+            if self.device.type == "cuda":
+                torch.cuda.synchronize()
             t2 = time.time()
             self.step += 1
             if (self.step + 1) % self.log_interval == 0:
                 val_loss, val_metric = (self.validate() if self.config.trainer.eval_when_log else (0.0, 0.0))
-                train_loss = torch.tensor(train_loss, device="cuda")
+                train_loss = torch.tensor(train_loss, device=self.device)
                 dist.all_reduce(train_loss, op=dist.ReduceOp.SUM)
                 self.logging_metrics.update({
                     "train_loss": round(train_loss.item() / self.ngpus, 4),

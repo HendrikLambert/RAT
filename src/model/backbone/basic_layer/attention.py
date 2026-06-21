@@ -22,7 +22,7 @@ class Attention(Base):
     ):
         super().__init__()
         factory_kwargs = {
-            "device": kwargs.get("device", "cuda"),
+            "device": kwargs.get("device", None),
             "dtype": kwargs.get("dtype", torch.float32),
         }
         self.d_model = d_model

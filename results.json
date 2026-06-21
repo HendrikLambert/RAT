@@ -1,0 +1,465 @@
+{
+    "slurm_runs": {
+        "attn": {
+            "job_id": "10028953",
+            "filename": "slurm-attn-10028953.out",
+            "status": "COMPLETED",
+            "train_loss": 3.2505,
+            "val_loss": 3.2344,
+            "val_ppl": 25.392070770263672,
+            "fwd_bwd_latency_s": 7.331958055496216
+        },
+        "rnn": {
+            "job_id": "10028954",
+            "filename": "slurm-rnn-10028954.out",
+            "status": "COMPLETED",
+            "train_loss": 3.3779,
+            "val_loss": 3.371,
+            "val_ppl": 29.106365203857422,
+            "fwd_bwd_latency_s": 6.400552988052368
+        },
+        "l128": {
+            "job_id": "10028955",
+            "filename": "slurm-l128-10028955.out",
+            "status": "COMPLETED",
+            "train_loss": 3.3051,
+            "val_loss": 3.2921,
+            "val_ppl": 26.899015426635742,
+            "fwd_bwd_latency_s": 7.5178375244140625
+        },
+        "hier": {
+            "job_id": "10147601",
+            "filename": "slurm-hier-10147601.out",
+            "status": "COMPLETED",
+            "train_loss": 5.7263,
+            "val_loss": null,
+            "val_ppl": null,
+            "fwd_bwd_latency_s": 340.3242027759552
+        },
+        "l64": {
+            "job_id": "10087272",
+            "filename": "slurm-l64-10087272.out",
+            "status": "COMPLETED",
+            "train_loss": 3.3051,
+            "val_loss": 3.2926,
+            "val_ppl": 26.911447525024414,
+            "fwd_bwd_latency_s": 7.461392402648926
+        },
+        "l256": {
+            "job_id": "10087273",
+            "filename": "slurm-l256-10087273.out",
+            "status": "COMPLETED",
+            "train_loss": 3.3218,
+            "val_loss": 3.3141,
+            "val_ppl": 27.49787712097168,
+            "fwd_bwd_latency_s": 7.465286016464233
+        },
+        "l16": {
+            "job_id": "10087274",
+            "filename": "slurm-l16-10087274.out",
+            "status": "COMPLETED",
+            "train_loss": 3.2702,
+            "val_loss": 3.2592,
+            "val_ppl": 26.02837371826172,
+            "fwd_bwd_latency_s": 7.826805591583252
+        }
+    },
+    "efficiency_benchmarks": {
+        "Attention": {
+            "runs": [
+                {
+                    "seq": 4096,
+                    "bs": 64,
+                    "train_ms": 225.96,
+                    "context_ms": 73.25,
+                    "gen_ms": 1.8591
+                },
+                {
+                    "seq": 8192,
+                    "bs": 32,
+                    "train_ms": 312.17,
+                    "context_ms": 96.02,
+                    "gen_ms": 1.8688
+                },
+                {
+                    "seq": 16384,
+                    "bs": 16,
+                    "train_ms": 478.9,
+                    "context_ms": 145.37,
+                    "gen_ms": 2.1234
+                },
+                {
+                    "seq": 32768,
+                    "bs": 8,
+                    "train_ms": 823.91,
+                    "context_ms": 237.87,
+                    "gen_ms": 1.5007
+                },
+                {
+                    "seq": 65536,
+                    "bs": 4,
+                    "train_ms": 1530.49,
+                    "context_ms": 439.7,
+                    "gen_ms": 1.5008
+                },
+                {
+                    "seq": 131072,
+                    "bs": 2,
+                    "train_ms": 2962.66,
+                    "context_ms": 868.26,
+                    "gen_ms": 1.5047
+                },
+                {
+                    "seq": 262144,
+                    "bs": 1,
+                    "train_ms": 5920.69,
+                    "context_ms": 1748.68,
+                    "gen_ms": 1.5056
+                }
+            ],
+            "gen_scans": [
+                {
+                    "seq": 4096,
+                    "latencies": [
+                        "1.82",
+                        "3.56",
+                        "6.03",
+                        "12.59",
+                        "24.64",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 8192,
+                    "latencies": [
+                        "3.1",
+                        "5.98",
+                        "12.37",
+                        "25.77",
+                        "50.12",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 16384,
+                    "latencies": [
+                        "6.11",
+                        "12.49",
+                        "26.01",
+                        "50.29",
+                        "OOM",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 32768,
+                    "latencies": [
+                        "13.11",
+                        "24.46",
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 65536,
+                    "latencies": [
+                        "25.81",
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 131072,
+                    "latencies": [
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 262144,
+                    "latencies": [
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM",
+                        "OOM"
+                    ]
+                }
+            ]
+        },
+        "RAT": {
+            "runs": [
+                {
+                    "seq": 4096,
+                    "bs": 64,
+                    "train_ms": 419.76,
+                    "context_ms": 98.81,
+                    "gen_ms": 0.4037
+                },
+                {
+                    "seq": 8192,
+                    "bs": 32,
+                    "train_ms": 424.25,
+                    "context_ms": 100.71,
+                    "gen_ms": 0.3943
+                },
+                {
+                    "seq": 16384,
+                    "bs": 16,
+                    "train_ms": 456.95,
+                    "context_ms": 105.32,
+                    "gen_ms": 0.4063
+                },
+                {
+                    "seq": 32768,
+                    "bs": 8,
+                    "train_ms": 517.26,
+                    "context_ms": 110.94,
+                    "gen_ms": 0.374
+                },
+                {
+                    "seq": 65536,
+                    "bs": 4,
+                    "train_ms": 638.5,
+                    "context_ms": 124.45,
+                    "gen_ms": 0.3702
+                },
+                {
+                    "seq": 131072,
+                    "bs": 2,
+                    "train_ms": 873.81,
+                    "context_ms": 151.3,
+                    "gen_ms": 0.3691
+                },
+                {
+                    "seq": 262144,
+                    "bs": 1,
+                    "train_ms": 1411.89,
+                    "context_ms": 204.41,
+                    "gen_ms": 0.3526
+                }
+            ],
+            "gen_scans": [
+                {
+                    "seq": 4096,
+                    "latencies": [
+                        "0.4",
+                        "0.52",
+                        "0.75",
+                        "1.23",
+                        "2.44",
+                        "9.53"
+                    ]
+                },
+                {
+                    "seq": 8192,
+                    "latencies": [
+                        "0.5",
+                        "0.7",
+                        "1.09",
+                        "2.1",
+                        "3.85",
+                        "14.41"
+                    ]
+                },
+                {
+                    "seq": 16384,
+                    "latencies": [
+                        "0.69",
+                        "1.06",
+                        "1.82",
+                        "3.39",
+                        "6.55",
+                        "26.91"
+                    ]
+                },
+                {
+                    "seq": 32768,
+                    "latencies": [
+                        "1.02",
+                        "1.7",
+                        "3.13",
+                        "6.21",
+                        "12.73",
+                        "50.94"
+                    ]
+                },
+                {
+                    "seq": 65536,
+                    "latencies": [
+                        "1.72",
+                        "3.07",
+                        "5.99",
+                        "12.36",
+                        "25.25",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 131072,
+                    "latencies": [
+                        "3.13",
+                        "6.07",
+                        "12.09",
+                        "24.63",
+                        "49.95",
+                        "OOM"
+                    ]
+                },
+                {
+                    "seq": 262144,
+                    "latencies": [
+                        "6.17",
+                        "12.25",
+                        "24.57",
+                        "49.13",
+                        "OOM",
+                        "OOM"
+                    ]
+                }
+            ]
+        },
+        "RNN": {
+            "runs": [
+                {
+                    "seq": 4096,
+                    "bs": 64,
+                    "train_ms": 232.53,
+                    "context_ms": 60.99,
+                    "gen_ms": 0.1926
+                },
+                {
+                    "seq": 8192,
+                    "bs": 32,
+                    "train_ms": 229.62,
+                    "context_ms": 62.29,
+                    "gen_ms": 0.1877
+                },
+                {
+                    "seq": 16384,
+                    "bs": 16,
+                    "train_ms": 229.99,
+                    "context_ms": 61.88,
+                    "gen_ms": 0.1854
+                },
+                {
+                    "seq": 32768,
+                    "bs": 8,
+                    "train_ms": 231.19,
+                    "context_ms": 64.5,
+                    "gen_ms": 0.1817
+                },
+                {
+                    "seq": 65536,
+                    "bs": 4,
+                    "train_ms": 239.45,
+                    "context_ms": 70.73,
+                    "gen_ms": 0.1818
+                },
+                {
+                    "seq": 131072,
+                    "bs": 2,
+                    "train_ms": 252.1,
+                    "context_ms": 83.74,
+                    "gen_ms": 0.1798
+                },
+                {
+                    "seq": 262144,
+                    "bs": 1,
+                    "train_ms": 402.9,
+                    "context_ms": 106.0,
+                    "gen_ms": 0.167
+                }
+            ],
+            "gen_scans": [
+                {
+                    "seq": 4096,
+                    "latencies": [
+                        "0.19",
+                        "0.2",
+                        "0.22",
+                        "0.3",
+                        "0.44",
+                        "1.43"
+                    ]
+                },
+                {
+                    "seq": 8192,
+                    "latencies": [
+                        "0.19",
+                        "0.2",
+                        "0.22",
+                        "0.3",
+                        "0.44",
+                        "1.43"
+                    ]
+                },
+                {
+                    "seq": 16384,
+                    "latencies": [
+                        "0.19",
+                        "0.2",
+                        "0.22",
+                        "0.3",
+                        "0.44",
+                        "1.43"
+                    ]
+                },
+                {
+                    "seq": 32768,
+                    "latencies": [
+                        "0.19",
+                        "0.2",
+                        "0.22",
+                        "0.3",
+                        "0.44",
+                        "1.44"
+                    ]
+                },
+                {
+                    "seq": 65536,
+                    "latencies": [
+                        "0.19",
+                        "0.2",
+                        "0.22",
+                        "0.3",
+                        "0.44",
+                        "1.43"
+                    ]
+                },
+                {
+                    "seq": 131072,
+                    "latencies": [
+                        "0.19",
+                        "0.2",
+                        "0.22",
+                        "0.3",
+                        "0.44",
+                        "1.44"
+                    ]
+                },
+                {
+                    "seq": 262144,
+                    "latencies": [
+                        "0.19",
+                        "0.2",
+                        "0.22",
+                        "0.3",
+                        "0.44",
+                        "1.43"
+                    ]
+                }
+            ]
+        }
+    }
+}

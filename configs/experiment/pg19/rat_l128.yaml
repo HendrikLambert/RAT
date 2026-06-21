@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - pg19/rat
+  - _self_
+
+model:
+  backbone:
+    seq_cell:
+      chunk_size: 128

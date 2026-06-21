@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/jeroenchu/Documents/TUD_MSC_Y1/CS4725_RSLS/hendrik_repo/**)",
+      "Read(//Users/jeroenchu/**)",
+      "Bash(ls /)",
+      "Bash(chmod +x /Users/jeroenchu/Documents/TUD_MSC_Y1/CS4725_RSLS/hendrik_repo/RAT/scripts/run_local.sh /Users/jeroenchu/Documents/TUD_MSC_Y1/CS4725_RSLS/hendrik_repo/RAT/scripts/delftblue.sbatch /Users/jeroenchu/Documents/TUD_MSC_Y1/CS4725_RSLS/hendrik_repo/RAT/scripts/daic.sbatch)",
+      "Bash(bash -n scripts/run_local.sh)",
+      "Bash(bash -n scripts/delftblue.sbatch)",
+      "Bash(bash -n scripts/daic.sbatch)",
+      "Bash(python -c ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import torch; print\\(torch.__version__\\); print\\('cuda:', torch.cuda.is_available\\(\\), 'mps:', torch.backends.mps.is_available\\(\\)\\)\")",
+      "Bash(git -C /Users/jeroenchu/Documents/TUD_MSC_Y1/CS4725_RSLS/hendrik_repo/RAT status --short)",
+      "Bash(git -C /Users/jeroenchu/Documents/TUD_MSC_Y1/CS4725_RSLS/hendrik_repo/RAT status)",
+      "Bash(git -C /Users/jeroenchu/Documents/TUD_MSC_Y1/CS4725_RSLS/hendrik_repo/RAT status --ignored)",
+      "Bash(ls -la /opt/homebrew/opt/python*/Frameworks/Python.framework/Versions/ 2>/dev/null; which python3.11 python3.12 python3.13 2>/dev/null)",
+      "Read(//opt/homebrew/opt/**)",
+      "Bash(grep -E \"chunk_size|RAT\\\\\\(\" /tmp/hier_smoke.log | head -10)",
+      "Read(//private/tmp/**)"
+    ]
+  }
+}

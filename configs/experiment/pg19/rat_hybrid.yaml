@@ -1,0 +1,14 @@
+# @package _global_
+defaults:
+  - pg19/rat
+  - override /model/backbone: sequence_interleave
+  - _self_
+
+model:
+  backbone:
+    interleave_step: 4
+    seq_cell1:
+      _name_: layer/rat
+      chunk_size: 64
+    seq_cell2:
+      _name_: layer/attention

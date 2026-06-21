@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - pg19/rat
+  - override /model/embedding@model.embedding.pe: multi_interrope
+  - _self_
+
+model:
+  backbone:
+    chunk_sizes: [64, 64, 64, 64, 256, 256, 256, 256, 256, 256, 256, 256]

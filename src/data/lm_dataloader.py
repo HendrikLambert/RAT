@@ -64,8 +64,9 @@ class LMOrderedDataloader:  # ensure that we only iterate it just once. Otherwis
         x = torch.from_numpy(arr[:-1].astype(np.int64)).reshape(self.batch_size, self.seq_len)
         y = torch.from_numpy(arr[1:].astype(np.int64)).reshape(self.batch_size, self.seq_len)
         y = torch.where(x == self.ignore_input_index, -100, y)
-        x, y = x.pin_memory().to("cuda", non_blocking=True), y.pin_memory().to("cuda", non_blocking=True)
-        return x, y  # return input and labels in torch format
+        if torch.cuda.is_available():
+            x, y = x.pin_memory(), y.pin_memory()
+        return x, y  # return input and labels in torch format; trainer handles .to(device)
 
     def get_fixlen_iter(self,):
         for i in range(self.start, self.end, self.batch_size):
@@ -126,7 +127,8 @@ class LMRandomDataloader:
         x = torch.stack([torch.from_numpy((arr[id: id + self.seq_len]).astype(np.int64)) for id in ids])
         y = torch.stack([torch.from_numpy((arr[id + 1 : id + 1 + self.seq_len]).astype(np.int64)) for id in ids])
         y = torch.where(x == self.ignore_input_index, -100, y)
-        x, y = x.pin_memory().to("cuda", non_blocking=True), y.pin_memory().to("cuda", non_blocking=True)
+        if torch.cuda.is_available():
+            x, y = x.pin_memory(), y.pin_memory()
         return x, y
 
     def get_fixlen_iter(self,):

@@ -1,0 +1,62 @@
+# @package _global_
+# Hierarchical RAT smoke run: per-layer chunk sizes.
+# Layer 0 uses chunk_size=64 (fine-grained local), layer 1 uses chunk_size=128
+# (coarser global). Proves the chunk_sizes plumbing in sequence.py + the
+# multi_interrope positional embedding work end-to-end. Scale up to the
+# 4x L=64 / 8x L=256 Split design on the cluster.
+defaults:
+  - /data: pg19/gpt2_smoke
+  - /model/backbone: sequence
+  - /model/backbone/layer@model.backbone.seq_cell: rat
+  - /model/backbone/layer@model.backbone.hidden_cell: ffn
+  - /model/head: lm
+  - /model/embedding: lm
+  - /model/embedding@model.embedding.pe: multi_interrope
+  - /task: lm
+  - /optim/lr_scheduler: cosine
+  - /optim/optimizer: adamw
+  - _self_
+
+wandb_use: false
+
+optim:
+  optimizer:
+    lr: 6.0e-4
+    weight_decay: 0.1
+    betas: [0.9, 0.98]
+  lr_scheduler:
+    warmup_iter: 0.1
+    eta_min: 1.0e-6
+
+wandb:
+  job_type: pg19_smoke_hier
+
+model:
+  backbone:
+    num_layers: 2
+    d_model: 128
+    dropout: 0.0
+    bias: false
+    ln: rmsnorm
+    init:
+      _name_: fixed
+      initializer_range: 0.02
+    chunk_sizes: [64, 128]
+    seq_cell:
+      d_head: 64
+      chunk_size: 64
+
+task:
+  ignore_index: -100
+
+trainer:
+  global_batch_size: ${data.global_batch_size}
+  gradient_clipping: 1.0
+  max_epoch: 1
+  load_checkpoint: false
+  save_checkpoint: false
+  log_interval: 5
+  eval_when_log: false
+  dtype: float32
+  device: cpu
+  torch_compile: false
